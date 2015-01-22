@@ -50,9 +50,11 @@ def postresults(jobguid,requestId,parameter_point):
   
   # also copy to server
   # subprocess.call('''ssh localhost "mkdir -p /Users/lukas/Code/atlas/recast/recast-frontend-prototype/rivet_results/{}"'''.format(requestId),shell = True)
-  subprocess.call('''mkdir -p /Users/lukas/Code/atlas/recast/recast-frontend-prototype/rivet_results/{}'''.format(requestId),shell = True)
 
-  subprocess.call(['cp', '-r', resultdir,'/Users/lukas/Code/atlas/recast/recast-frontend-prototype/rivet_results/{}/{}'.format(requestId,parameter_point)])
+
+  #also copy to server
+  subprocess.call('''ssh ciserver@lheinric-recast-hype "mkdir -p /home/ciserver/recast/recast-frontend-prototype/rivet_results/{}"'''.format(requestId),shell = True)
+  subprocess.call(['scp', '-r', resultdir,'ciserver@lheinric-recast-hype:/home/ciserver/recast/recast-frontend-prototype/rivet_results/{}/{}'.format(requestId,parameter_point)])
   
   io.Of('/monitor').In(str(jobguid)).Emit('results_done')
   return requestId
@@ -119,7 +121,7 @@ def prepare_job(jobguid,jobinfo):
   print "job uuid is {}".format(jobguid)
   workdir = 'workdirs/{}'.format(jobguid)
   
-  input_url = 'http://localhost:5000/rivet/inputfile/{}/{}/{}'.format(jobinfo['requestId'],jobinfo['pointcount'],jobinfo['file'])
+  input_url = 'http://{}:5000/rivet/inputfile/{}/{}/{}'.format(BROKERURL,jobinfo['requestId'],jobinfo['pointcount'],jobinfo['file'])
   print "downloading file : {}".format(input_url) 
   filepath = download_file(input_url,workdir)
 
