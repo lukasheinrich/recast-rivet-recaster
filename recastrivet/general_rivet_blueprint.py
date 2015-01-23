@@ -5,7 +5,6 @@ RECAST_ANALYSIS_ID = 'general_rivet'
 
 import json
 import requests
-import dmhiggs_backendtasks
 import requests
 import os
 from zipfile import ZipFile
