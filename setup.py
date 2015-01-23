@@ -1,7 +1,7 @@
 from setuptools import setup, find_packages
 
 setup(
-  name = '',
+  name = 'recast-rivet-recaster-demo',
   version = '0.0.1',
   description = 'recast-rivet-recaster-demo',
   url = 'http://github.com/lukasheinrich/recast-rivet-recaster-demo',
