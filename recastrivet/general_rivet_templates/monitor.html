@@ -1,0 +1,81 @@
+{% extends "base.html" %}
+        
+{% block prebody %}
+<script type="text/javascript">
+
+function postplots(){
+    var plots = ["PhotonPt","PhotonEta","MET","Cutflow"];
+    $.each(plots,function(i){
+        console.log(plots[i])
+        $('#DMHiggsFiducial-'+plots[i]+' .thumbnail img').attr('src',location.origin+'/plots/{{jobguid}}/'+plots[i]+'.png')
+        $('#DMHiggsFiducial-'+plots[i]+' .datalink').attr('href',location.origin+'/plots/{{jobguid}}/'+plots[i]+'.dat')
+        $('#DMHiggsFiducial-'+plots[i]+' .thumbnail').attr('href',location.origin+'/plots/{{jobguid}}/'+plots[i]+'.pdf')      
+    })
+} 
+
+$(document).ready(function(){
+    $('#plotpanel-box').hide()
+    
+    var socket = io.connect('http://' + document.domain + ':' + location.port + '/monitor');
+
+
+
+    socket.on('joined',function(data){
+        console.log('joined room, about to subscribe')
+        socket.emit('subscribe',{data: 'taskid'});
+        socket.emit('emitToRoom',{room: '{{jobguid}}'});        
+        // socket.emit('emitToAll');
+    })
+
+    socket.on('subscribed',function(data){
+        console.log('subscribed to pubsub')
+    })
+    
+    socket.on('pythia_status',function(data){
+        $("#pythia_status").html('Pythia ('+0+'/'+10+')')
+    })
+
+    socket.on('pythia_done',function(data){
+        $("#pythia_status").addClass("list-group-item-success");
+    })
+
+    socket.on('rivet_done',function(data){
+        $("#rivet_status").addClass("list-group-item-success");
+    })
+
+    socket.on('postresults_done',function(data){
+        location.href = location.origin + '/result/' + data['requestId']
+    })
+
+    socket.on('workdir_done',function(data){
+        console.log('workdir done')
+    })
+
+
+    socket.on('room_msg',function(data){
+        console.log('room msg')
+    })
+    
+    socket.on('connect',function(){
+        console.log('join room')
+        socket.emit('join',{room: '{{jobguid}}'});        
+    })
+    
+
+});
+</script>
+
+{% endblock %}
+
+{% block container%}
+<div class="page-header">
+    <h1>Job Monitor for <small>{{jobguid}}</small></h1>
+</div>
+
+<div class="row">
+    <ul class="list-group">
+      <li id="pythia_status" class="list-group-item">Pythia</li>
+      <li id="rivet_status"  class="list-group-item">Rivet</li>
+    </ul>
+</div>
+{% endblock %}
