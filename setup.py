@@ -8,9 +8,11 @@ setup(
   author = 'Lukas Heinrich',
   author_email = 'lukas.heinrich@cern.ch',
   packages = find_packages(),
+  include_package_data = True,
   install_requires = [
     'Flask',
     'celery',
+    'requests',
     'recast-api',
     'yoda',
     'socket.io-python-emitter',

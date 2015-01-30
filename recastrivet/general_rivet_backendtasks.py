@@ -1,12 +1,6 @@
 import time
 from celery import Celery,task
 
-BROKERURL = 'lheinric-recast-hype'
-
-CELERY_RESULT_BACKEND = 'redis://{}:6379/0'.format(BROKERURL)
-
-app = Celery('tasks', backend='redis://{}'.format(BROKERURL), broker='redis://{}'.format(BROKERURL))
-
 
 import subprocess
 import glob
@@ -19,8 +13,26 @@ import redis
 import emitter
 import zipfile
 
-red = redis.StrictRedis(host = BROKERURL, db = 0)
+
+# BACKENDUSER = 'lukas'
+# BACKENDHOST = 'localhost'
+# BACKENDBASEPATH = '/Users/lukas/Code/atlas/recast/recast-frontend-prototype'
+BACKENDUSER = 'analysis'
+BACKENDHOST = 'recast-demo'
+BACKENDBASEPATH = '/home/analysis/recast/recast-frontend-prototype'
+
+CELERY_RESULT_BACKEND = 'redis://{}:6379/0'.format(BACKENDHOST)
+
+app = Celery('tasks', backend='redis://{}'.format(BACKENDHOST), broker='redis://{}'.format(BACKENDHOST))
+
+red = redis.StrictRedis(host = BACKENDHOST, db = 0)
 io  = emitter.Emitter({'client': red})
+
+
+from datetime import datetime
+
+def socketlog(jobguid,msg):
+  io.Of('/monitor').In(jobguid).Emit('room_msg',{'date':datetime.now().strftime('%Y-%m-%d %X'),'msg':msg})
 
 import requests
 def download_file(url,download_dir):
@@ -35,6 +47,7 @@ def download_file(url,download_dir):
                 f.flush()
     return download_path    
 
+
 @task
 def postresults(jobguid,requestId,parameter_point):
   workdir = 'workdirs/{}'.format(jobguid)
@@ -48,13 +61,21 @@ def postresults(jobguid,requestId,parameter_point):
   shutil.copytree('{}/plots'.format(workdir),'{}/plots'.format(resultdir))
   shutil.copyfile('{}/Rivet.yoda'.format(workdir),'{}/Rivet.yoda'.format(resultdir))
   
-  # also copy to server
-  # subprocess.call('''ssh localhost "mkdir -p /Users/lukas/Code/atlas/recast/recast-frontend-prototype/rivet_results/{}"'''.format(requestId),shell = True)
-
 
   #also copy to server
-  subprocess.call('''ssh ciserver@lheinric-recast-hype "mkdir -p /home/ciserver/recast/recast-frontend-prototype/rivet_results/{}"'''.format(requestId),shell = True)
-  subprocess.call(['scp', '-r', resultdir,'ciserver@lheinric-recast-hype:/home/ciserver/recast/recast-frontend-prototype/rivet_results/{}/{}'.format(requestId,parameter_point)])
+  subprocess.call('''ssh {user}@{host} "mkdir -p {base}/results/{requestId}"'''.format(
+    user = BACKENDUSER,
+    host = BACKENDHOST,
+    base = BACKENDBASEPATH,
+    requestId = requestId)
+  ,shell = True)
+  subprocess.call(['scp', '-r', resultdir,'{user}@{host}:{base}/results/{requestId}'.format(
+    user = BACKENDUSER,
+    host = BACKENDHOST,
+    base = BACKENDBASEPATH,
+    requestId = requestId,
+    point = parameter_point
+  )])
   
   io.Of('/monitor').In(str(jobguid)).Emit('results_done')
   return requestId
@@ -71,9 +92,8 @@ def rivet(jobguid,rivetanalysis):
 
   yodafile = '{}/Rivet.yoda'.format(workdir)
   plotdir = '{}/plots'.format(workdir)
-  analysisdir = os.path.abspath('../implementation/rivet')
   subprocess.call(['rivet','-a',rivetanalysis,'-H',yodafile]+hepmcfiles)
-  subprocess.call(['rivet-mkhtml','-c','../implementation/rivet/DMHiggsFiducial.plot','-o',plotdir,yodafile])
+  subprocess.call(['rivet-mkhtml','-o',plotdir,yodafile])
   io.Of('/monitor').In(str(jobguid)).Emit('rivet_done')
   
   return jobguid
@@ -102,12 +122,12 @@ def pythia(jobguid):
     steeringfname = '{}/{}.steering'.format(workdir,basefname)
     outfname = workdir+'/'+'.'.join(basefname.split('.')[0:-1]+['hepmc'])
 
-    with open('../implementation/pythiasteering.tplt') as steeringfile:
+    with open('pythiasteering.tplt') as steeringfile:
       template = env.from_string(steeringfile.read())
       with open(steeringfname,'w+') as output:
         output.write(template.render({'INPUTLHEF':absinputfname}))
 
-    subprocess.call(['../implementation/pythia/pythiarun',steeringfname,outfname])
+    subprocess.call(['pythia/pythiarun',steeringfname,outfname])
 
   io.Of('/monitor').In(str(jobguid)).Emit('pythia_done')
   
