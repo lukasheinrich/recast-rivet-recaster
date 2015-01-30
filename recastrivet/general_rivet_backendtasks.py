@@ -63,13 +63,13 @@ def postresults(jobguid,requestId,parameter_point):
   
 
   #also copy to server
-  subprocess.call('''ssh {user}@{host} "mkdir -p {base}/results/{requestId}"'''.format(
+  subprocess.call('''ssh {user}@{host} "mkdir -p {base}/rivet_results/{requestId}"'''.format(
     user = BACKENDUSER,
     host = BACKENDHOST,
     base = BACKENDBASEPATH,
     requestId = requestId)
   ,shell = True)
-  subprocess.call(['scp', '-r', resultdir,'{user}@{host}:{base}/results/{requestId}'.format(
+  subprocess.call(['scp', '-r', resultdir,'{user}@{host}:{base}/rivet_results/{requestId}'.format(
     user = BACKENDUSER,
     host = BACKENDHOST,
     base = BACKENDBASEPATH,
@@ -141,7 +141,7 @@ def prepare_job(jobguid,jobinfo):
   print "job uuid is {}".format(jobguid)
   workdir = 'workdirs/{}'.format(jobguid)
   
-  input_url = 'http://{}:5000/rivet/inputfile/{}/{}/{}'.format(BROKERURL,jobinfo['requestId'],jobinfo['pointcount'],jobinfo['file'])
+  input_url = 'http://{}:8000/rivet/inputfile/{}/{}/{}'.format(BACKENDHOST,jobinfo['requestId'],jobinfo['pointcount'],jobinfo['file'])
   print "downloading file : {}".format(input_url) 
   filepath = download_file(input_url,workdir)
 
