@@ -4,7 +4,7 @@ setup(
   name = 'recast-rivet-recaster-demo',
   version = '0.0.1',
   description = 'recast-rivet-recaster-demo',
-  url = 'http://github.com/lukasheinrich/recast-rivet-recaster-demo',
+  url = 'http://github.com/recast-hep/recast-rivet-recaster-demo',
   author = 'Lukas Heinrich',
   author_email = 'lukas.heinrich@cern.ch',
   packages = find_packages(),
@@ -18,8 +18,7 @@ setup(
     'socket.io-python-emitter',
     'redis'
   ],
-  dependency_links = [
-    'https://github.com/ziyasal/socket.io-python-emitter/tarball/master#egg=socket.io-python-emitter-0.1.3',
-    'http://github.com/cranmer/recast-api/tarball/master#egg=recast-api-0.0.1',
+  dependency_links = [ 'https://github.com/ziyasal/socket.io-python-emitter/tarball/master#egg=socket.io-python-emitter-0.1.3',
+    'http://github.com/recast-hep/recast-api/tarball/master#egg=recast-api-0.0.1',
   ]
 )
