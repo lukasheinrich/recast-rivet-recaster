@@ -140,15 +140,17 @@ def prepare_job(jobguid,jobinfo):
   print "job info is {}".format(jobinfo)
   print "job uuid is {}".format(jobguid)
   workdir = 'workdirs/{}'.format(jobguid)
-  
-  input_url = 'http://{}:8000/rivet/inputfile/{}/{}/{}'.format(BACKENDHOST,jobinfo['requestId'],jobinfo['pointcount'],jobinfo['file'])
+
+  input_url = jobinfo['run-condition'][0]['lhe-file']
   print "downloading file : {}".format(input_url) 
   filepath = download_file(input_url,workdir)
 
   print "downloaded file to: {}".format(filepath)
+  socketlog('another','downloaded input files')
+
 
   with zipfile.ZipFile(filepath)as f:
-    f.extractall('{}/inputs'.format(workdir))
+    f.extractall('{}/inputs'.format(workdir)) 
 
   return jobguid
 
@@ -171,15 +173,15 @@ import recastapi.request
 import json
 import uuid
 
-def get_chain(jobinfo):
+def get_chain(request_uuid,point,rivetanalysis):
+
+  request_info = recastapi.request.request(request_uuid)
+  jobinfo = request_info['parameter-points'][point]
+
 
   jobguid = uuid.uuid1()
 
   analysis_queue = 'rivet_queue'  
-
-  request_uuid = jobinfo['requestId']
-  point = jobinfo['pointcount']
-  rivetanalysis = jobinfo['rivetanalysis']
 
   chain = (
             prepare_workdir.subtask((request_uuid,jobguid),queue=analysis_queue) |
