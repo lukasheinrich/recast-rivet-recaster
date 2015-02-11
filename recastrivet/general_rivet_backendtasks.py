@@ -52,6 +52,8 @@ def download_file(url,download_dir):
 def postresults(jobguid,requestId,parameter_point):
   workdir = 'workdirs/{}'.format(jobguid)
   yodafile = '{}/Rivet.yoda'.format(workdir)
+  logfile = '{}/Rivet.log'.format(workdir)
+
   resultdir = 'results/{}/{}'.format(requestId,parameter_point)
   
   if(os.path.exists(resultdir)):
@@ -60,17 +62,18 @@ def postresults(jobguid,requestId,parameter_point):
   os.makedirs(resultdir)  
   shutil.copytree('{}/plots'.format(workdir),'{}/plots'.format(resultdir))
   shutil.copyfile('{}/Rivet.yoda'.format(workdir),'{}/Rivet.yoda'.format(resultdir))
+  shutil.copyfile('{}/Rivet.log'.format(workdir),'{}/Rivet.log'.format(resultdir))
   
 
   #also copy to server
-  subprocess.call('''ssh {user}@{host} "mkdir -p {base}/results/{requestId}/{point}"'''.format(
+  subprocess.call('''ssh {user}@{host} "mkdir -p {base}/results/{requestId}/{point} && rm -rf {base}/results/{requestId}/{point}/rivet"'''.format(
     user = BACKENDUSER,
     host = BACKENDHOST,
     base = BACKENDBASEPATH,
     requestId = requestId,
-    point = parameter_pt)
+    point = parameter_point)
   ,shell = True)
-  subprocess.call(['scp', '-r',resultdir,'{user}@{host}:{base}/results/{requestId}/rivet'.format(
+  subprocess.call(['scp', '-r',resultdir,'{user}@{host}:{base}/results/{requestId}/{point}/rivet'.format(
     user = BACKENDUSER,
     host = BACKENDHOST,
     base = BACKENDBASEPATH,
@@ -93,7 +96,10 @@ def rivet(jobguid,rivetanalysis):
 
   yodafile = '{}/Rivet.yoda'.format(workdir)
   plotdir = '{}/plots'.format(workdir)
-  subprocess.call(['rivet','-a',rivetanalysis,'-H',yodafile]+hepmcfiles)
+
+  logfile = '{}/Rivet.log'.format(workdir)
+  with open(logfile,'w') as log:
+    subprocess.call(['rivet','-a',rivetanalysis,'-H',yodafile]+hepmcfiles,stdout = log)
   subprocess.call(['rivet-mkhtml','-o',plotdir,yodafile])
   io.Of('/monitor').In(str(jobguid)).Emit('rivet_done')
   
