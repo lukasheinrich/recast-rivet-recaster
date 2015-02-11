@@ -66,7 +66,7 @@ def postresults(jobguid,requestId,parameter_point):
   subprocess.call('''ssh {user}@{host} "mkdir -p {base}/results/{requestId}/{point}"'''.format(
     user = BACKENDUSER,
     host = BACKENDHOST,
-    base = results,
+    base = BACKENDBASEPATH,
     requestId = requestId,
     point = parameter_pt)
   ,shell = True)
