@@ -70,7 +70,7 @@ def postresults(jobguid,requestId,parameter_point):
     requestId = requestId,
     point = parameter_pt)
   ,shell = True)
-  subprocess.call(['scp', '-r', ,'{user}@{host}:{base}/results/{requestId}/rivet'.format(
+  subprocess.call(['scp', '-r',resultdir,'{user}@{host}:{base}/results/{requestId}/rivet'.format(
     user = BACKENDUSER,
     host = BACKENDHOST,
     base = BACKENDBASEPATH,
