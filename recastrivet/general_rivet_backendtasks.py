@@ -52,7 +52,7 @@ def download_file(url,download_dir):
 def postresults(jobguid,requestId,parameter_point):
   workdir = 'workdirs/{}'.format(jobguid)
   yodafile = '{}/Rivet.yoda'.format(workdir)
-  resultdir = '{}/results/{}/{}'.format(BACKENDBASEPATH,requestId,parameter_point)
+  resultdir = 'results/{}/{}'.format(requestId,parameter_point)
   
   if(os.path.exists(resultdir)):
     shutil.rmtree(resultdir)
@@ -69,7 +69,7 @@ def postresults(jobguid,requestId,parameter_point):
     base = results,
     requestId = requestId)
   ,shell = True)
-  subprocess.call(['scp', '-r', resultdir,'{user}@{host}:{base}/results/{requestId}'.format(
+  subprocess.call(['scp', '-r', ,'{user}@{host}:{base}/results/{requestId}'.format(
     user = BACKENDUSER,
     host = BACKENDHOST,
     base = BACKENDBASEPATH,
