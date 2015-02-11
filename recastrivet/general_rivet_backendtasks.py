@@ -63,13 +63,14 @@ def postresults(jobguid,requestId,parameter_point):
   
 
   #also copy to server
-  subprocess.call('''ssh {user}@{host} "mkdir -p {base}/results/{requestId}"'''.format(
+  subprocess.call('''ssh {user}@{host} "mkdir -p {base}/results/{requestId}/{point}"'''.format(
     user = BACKENDUSER,
     host = BACKENDHOST,
     base = results,
-    requestId = requestId)
+    requestId = requestId,
+    point = parameter_pt)
   ,shell = True)
-  subprocess.call(['scp', '-r', ,'{user}@{host}:{base}/results/{requestId}'.format(
+  subprocess.call(['scp', '-r', ,'{user}@{host}:{base}/results/{requestId}/rivet'.format(
     user = BACKENDUSER,
     host = BACKENDHOST,
     base = BACKENDBASEPATH,
