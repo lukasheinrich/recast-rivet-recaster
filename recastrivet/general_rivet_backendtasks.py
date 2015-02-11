@@ -19,7 +19,7 @@ import zipfile
 # BACKENDBASEPATH = '/Users/lukas/Code/atlas/recast/recast-frontend-prototype'
 BACKENDUSER = 'analysis'
 BACKENDHOST = 'recast-demo'
-BACKENDBASEPATH = '/home/analysis/recast/recast-frontend-prototype'
+BACKENDBASEPATH = '/home/analysis/recast/recaststorage'
 
 CELERY_RESULT_BACKEND = 'redis://{}:6379/0'.format(BACKENDHOST)
 
@@ -52,7 +52,7 @@ def download_file(url,download_dir):
 def postresults(jobguid,requestId,parameter_point):
   workdir = 'workdirs/{}'.format(jobguid)
   yodafile = '{}/Rivet.yoda'.format(workdir)
-  resultdir = 'rivet_results/{}/{}'.format(requestId,parameter_point)
+  resultdir = '{}/results/{}/{}'.format(BACKENDBASEPATH,requestId,parameter_point)
   
   if(os.path.exists(resultdir)):
     shutil.rmtree(resultdir)
@@ -63,13 +63,13 @@ def postresults(jobguid,requestId,parameter_point):
   
 
   #also copy to server
-  subprocess.call('''ssh {user}@{host} "mkdir -p {base}/rivet_results/{requestId}"'''.format(
+  subprocess.call('''ssh {user}@{host} "mkdir -p {base}/results/{requestId}"'''.format(
     user = BACKENDUSER,
     host = BACKENDHOST,
-    base = BACKENDBASEPATH,
+    base = results,
     requestId = requestId)
   ,shell = True)
-  subprocess.call(['scp', '-r', resultdir,'{user}@{host}:{base}/rivet_results/{requestId}'.format(
+  subprocess.call(['scp', '-r', resultdir,'{user}@{host}:{base}/results/{requestId}'.format(
     user = BACKENDUSER,
     host = BACKENDHOST,
     base = BACKENDBASEPATH,
