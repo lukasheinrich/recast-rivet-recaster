@@ -1,10 +1,10 @@
 {% extends "base.html" %}
-{% set page_version = "RIVET" %}
         
 {% block prebody %}
 <script type="text/javascript">
 
 $(document).ready(function(){
+$.ajax(location.origin+'/resultfile/{{requestId}}/{{parameter_pt}}/rivet/Rivet.log',{complete:function(data){$('#logfile').append(data.responseText)}})
 });
 </script>
 
@@ -16,6 +16,9 @@ $(document).ready(function(){
 </div>
 
 <div class="row">
+    <a href="/resultfile/{{requestId}}/{{parameter_pt}}/rivet/Rivet.log">download logfile</a>
+    <pre id="logfile"></pre> 
+ 
     <div id="plotpanel-box" class="panel panel-default">
       {% for analysis,plotlist in plotdict.iteritems() %}
 
@@ -23,6 +26,7 @@ $(document).ready(function(){
             <h3 class="panel-title">Plots for Rivet Analysis {{analysis}}</h3>
           </div>
           <div class="panel-body" id="plot-panel">
+
 
           {% for plot in plotlist %}
               <div class="col-md-3" id="{{plot}}" name="{{plot}}">>
