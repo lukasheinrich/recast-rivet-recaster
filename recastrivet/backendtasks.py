@@ -25,8 +25,13 @@ def rivet(jobguid,rivetanalysis):
   if not hepmcfiles: raise IOError
 
   yodafile = '{}/Rivet.yoda'.format(workdir)
+  logile = '{}/Rivet.log'.format(workdir)
+
   plotdir = '{}/plots'.format(workdir)
-  subprocess.call(['rivet','-a',rivetanalysis,'-H',yodafile]+hepmcfiles)
+
+  with open(logfile,'w') as log:
+    subprocess.call(['rivet','-a',rivetanalysis,'-H',yodafile]+hepmcfiles,stdout = log)
+
   subprocess.call(['rivet-mkhtml','-o',plotdir,yodafile])
 
   socketlog(jobguid,'ran rivet')
