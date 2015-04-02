@@ -1,2 +1,2 @@
-recursive-include recastrivet/general_rivet_templates *
+recursive-include recastrivet/templates *
 include recastrivet/rivetmap.pickle

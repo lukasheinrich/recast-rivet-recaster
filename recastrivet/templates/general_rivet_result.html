@@ -26,9 +26,9 @@ $(document).ready(function(){
 
           {% for plot in plotlist %}
               <div class="col-md-3" id="{{plot}}" name="{{plot}}">>
-                <a href="#{{plot}}">&#9875;</a><a href="/rivetresult/plot/{{requestId}}/{{parameter_pt}}/{{analysis}}/{{plot}}.dat" class="datalink">&#8984</a> {{plot}}:<br/>
-                <a href="/rivetresult/plot/{{requestId}}/{{parameter_pt}}/{{analysis}}/{{plot}}.pdf" class="thumbnail">
-                    <img src="/rivetresult/plot/{{requestId}}/{{parameter_pt}}/{{analysis}}/{{plot}}.png">
+                <a href="#{{plot}}">&#9875;</a><a href="/resultfile/{{requestId}}/{{parameter_pt}}/rivet/plots/{{analysis}}/{{plot}}.dat" class="datalink">&#8984</a> {{plot}}:<br/>
+                <a href="/resultfile/{{requestId}}/{{parameter_pt}}/rivet/plots/{{analysis}}/{{plot}}.pdf" class="thumbnail">
+                    <img src="/resultfile/{{requestId}}/{{parameter_pt}}/rivet/plots/{{analysis}}/{{plot}}.png">
                 </a>
               </div>
 

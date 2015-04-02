@@ -1,5 +1,5 @@
 from flask import Blueprint, render_template, jsonify, request, send_from_directory
-blueprint = Blueprint('general_rivet', __name__, template_folder='general_rivet_templates')
+blueprint = Blueprint('general_rivet', __name__, template_folder='templates')
 
 RECAST_ANALYSIS_ID = 'general_rivet'
 
@@ -14,14 +14,15 @@ import glob
 def result_view(requestId,parameter_pt):
   analysis = '*'
 
-  analyses = filter(os.path.isdir,glob.glob('rivet_results/{}/{}/plots/*'.format(requestId,parameter_pt)))
+  content_path = os.environ['RECAST_CONTENT_PATH_TEMPL'].format(requestId,parameter_pt)
+  analyses = filter(os.path.isdir,glob.glob('{}/rivet/plots/*'.format(content_path)))
 
-  print analyses
-  print ['rivet_results/{}/{}/plots/{}/*.dat'.format(requestId,parameter_pt,a) for a in analyses]
+  #  print analyses
+  #  print ['{}/rivet/plots/{}/*.dat'.format(content_path,a) for a in analyses]
 
   plotdict = {os.path.basename(a):[os.path.basename(p).rsplit('.',1)[0] for p in glob.glob('{}/*.dat'.format(a))] for a in analyses}
 
-  print plotdict
+  #  print plotdict
   
   return render_template('general_rivet_result.html',analysisId = RECAST_ANALYSIS_ID,requestId=requestId,parameter_pt=parameter_pt,plotdict = plotdict)
 
