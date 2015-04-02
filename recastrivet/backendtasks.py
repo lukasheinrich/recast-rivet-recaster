@@ -25,7 +25,7 @@ def rivet(jobguid,rivetanalysis):
   if not hepmcfiles: raise IOError
 
   yodafile = '{}/Rivet.yoda'.format(workdir)
-  logile = '{}/Rivet.log'.format(workdir)
+  logfile = '{}/Rivet.log'.format(workdir)
 
   plotdir = '{}/plots'.format(workdir)
 
