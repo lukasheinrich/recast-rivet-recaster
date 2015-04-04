@@ -1,27 +1,16 @@
-import time
-from celery import shared_task
-
 import subprocess
 import glob
 import jinja2
 import yoda
 import os
-import shutil
+import logging
+log = logging.getLogger('RECAST')
 
-import redis
-import emitter
-import zipfile
-
-from recastbackend.backendtasks import socketlog
-
-@shared_task
 def rivet(jobguid,rivetanalysis):
   workdir = 'workdirs/{}'.format(jobguid)
   hepmcfiles = glob.glob('{}/*.hepmc'.format(workdir))
 
-
   print "running rivet analysis: {}".format(rivetanalysis) 
-  # raise NotImplementedError
   if not hepmcfiles: raise IOError
 
   yodafile = '{}/Rivet.yoda'.format(workdir)
@@ -29,16 +18,13 @@ def rivet(jobguid,rivetanalysis):
 
   plotdir = '{}/plots'.format(workdir)
 
-  with open(logfile,'w') as log:
-    subprocess.call(['rivet','-a',rivetanalysis,'-H',yodafile]+hepmcfiles,stdout = log)
+  with open(logfile,'w') as logfile:
+    subprocess.call(['rivet','-a',rivetanalysis,'-H',yodafile]+hepmcfiles,stdout = logfile)
 
   subprocess.call(['rivet-mkhtml','-o',plotdir,yodafile])
 
-  socketlog(jobguid,'ran rivet')
-  
-  return jobguid
-  
-@shared_task
+  log.info('ran rivet')
+    
 def pythia(jobguid):
   workdir = 'workdirs/{}'.format(jobguid)
 
@@ -49,7 +35,6 @@ def pythia(jobguid):
   print 'found {} event files'.format(len(eventfiles))
   
   env = jinja2.Environment(undefined=jinja2.StrictUndefined)
-
 
   if not eventfiles:
     print 'no event files found'
@@ -72,15 +57,13 @@ def pythia(jobguid):
     #sanity check that file is non-empty
     assert os.stat(outfname).st_size > 0 
 
-  socketlog(jobguid,'ran pythia')
-  return jobguid
+  log.info('ran pythia')
+
+def recast(ctx):
+  jobguid = ctx['jobguid']
+  analysis = ctx['analysis']
+  pythia(jobguid)
+  rivet(jobguid,analysis)
 
 def resultlist():
   return ['plots','Rivet.yoda','Rivet.log']
-
-def get_chain(queuename,rivetanalysis):
-  chain = (
-            pythia.subtask(queue=queuename)                                 |
-            rivet.subtask((rivetanalysis,),queue=queuename)
-          )
-  return chain  
