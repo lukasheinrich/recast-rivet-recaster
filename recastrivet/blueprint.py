@@ -10,13 +10,16 @@ import requests
 import os
 from zipfile import ZipFile
 import glob
+import recastbackend.resultaccess
 
 @blueprint.route('/t/<requestId>/<parameter_pt>')
 def result_view(requestId,parameter_pt):
   analysis = '*'
 
-  content_path = os.environ['RECAST_CONTENT_PATH_TEMPL'].format(requestId,parameter_pt)
-  analyses = filter(os.path.isdir,glob.glob('{}/rivet/plots/*'.format(content_path)))
+  
+  content_path = recastbackend.resultaccess.resultfilepath(requestId,parameter_pt,'rivet','plots')
+
+  analyses = filter(os.path.isdir,glob.glob('{}/*'.format(content_path)))
 
   #  print analyses
   #  print ['{}/rivet/plots/{}/*.dat'.format(content_path,a) for a in analyses]
